@@ -1,6 +1,3 @@
-modxFastRouter
-==============
-
 ##MODX Fast Router
 
 Используется вот эта замечательная библиотека https://github.com/nikic/FastRoute
