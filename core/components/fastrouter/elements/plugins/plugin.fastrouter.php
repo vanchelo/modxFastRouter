@@ -5,6 +5,6 @@ $router = new FastRouter($modx);
 
 if ($modx->event->name == 'OnPageNotFound') {
     $router->dispatch();
-} else if ($modx->event->name == 'OnChunkSave' && $chunk->name == 'routes') {
+} else if ($modx->event->name == 'OnChunkSave' && $chunk->name == 'fastrouter') {
     $router->clearCache();
 }

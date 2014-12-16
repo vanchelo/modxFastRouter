@@ -2,8 +2,7 @@
 
 require_once __DIR__ . '/vendor/nikic/fast-route/src/bootstrap.php';
 
-class FastRouter
-{
+class FastRouter {
     /**
      * Path to routes cache
      *
@@ -26,8 +25,7 @@ class FastRouter
     /**
      * @param modX $modx
      */
-    function __construct(modX $modx)
-    {
+    function __construct(modX $modx) {
         $this->modx = $modx;
         $this->cacheFile = $modx->getOption(xPDO::OPT_CACHE_PATH) . 'fastrouter.cache.php';
         $this->paramsKey = $modx->getOption('fastrouter.paramsKey', null, 'fastrouter');
@@ -36,19 +34,17 @@ class FastRouter
     /**
      * @return mixed
      */
-    protected function getMethod()
-    {
+    protected function getMethod() {
         return $_SERVER['REQUEST_METHOD'];
     }
 
     /**
      * @return string
      */
-    protected function getUri()
-    {
+    protected function getUri() {
         $alias = $this->modx->getOption('request_alias', null, 'q');
 
-        $uri = isset($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
+        $uri = isset($_REQUEST[$alias]) ? (string)$_REQUEST[$alias] : '';
 
         return '/' . ltrim($uri, '/');
     }
@@ -56,8 +52,7 @@ class FastRouter
     /**
      * @return FastRoute\Dispatcher|FastRoute\Dispatcher\GroupCountBased
      */
-    protected function getDispatcher()
-    {
+    protected function getDispatcher() {
         if (!isset($this->dispatcher)) {
             $this->dispatcher = FastRoute\cachedDispatcher(function (FastRoute\RouteCollector $r) {
                 $this->getRoutes($r);
@@ -70,8 +65,7 @@ class FastRouter
     /**
      * @param \FastRoute\RouteCollector $r
      */
-    protected function getRoutes(FastRoute\RouteCollector $r)
-    {
+    protected function getRoutes(FastRoute\RouteCollector $r) {
         $routes = json_decode($this->modx->getChunk('fastrouter'), true);
 
         if (!$routes) {
@@ -88,8 +82,7 @@ class FastRouter
     /**
      * @return null
      */
-    public function dispatch()
-    {
+    public function dispatch() {
         $dispatcher = $this->getDispatcher();
 
         $params = $dispatcher->dispatch($this->getMethod(), $this->getUri());
@@ -110,9 +103,8 @@ class FastRouter
      * @param array $params
      * @return null
      */
-    protected function handle(array $params)
-    {
-        if ((int) $params[1] == $params[1]) {
+    protected function handle(array $params) {
+        if ((int)$params[1] == $params[1]) {
             $_REQUEST = $_REQUEST + array($this->paramsKey => $params[2]);
             $this->modx->sendForward($params[1]);
         }
@@ -123,8 +115,7 @@ class FastRouter
     /**
      * @return null
      */
-    protected function error()
-    {
+    protected function error() {
         $options = array(
             'response_code' => $this->modx->getOption('error_page_header', null, 'HTTP/1.1 404 Not Found'),
             'error_type' => '404',
@@ -141,8 +132,7 @@ class FastRouter
     /**
      * Remove routes cache
      */
-    public function clearCache()
-    {
+    public function clearCache() {
         if (file_exists($this->cacheFile)) {
             unlink($this->cacheFile);
         }
