@@ -4,7 +4,7 @@ require_once __DIR__ . '/vendor/nikic/fast-route/src/bootstrap.php';
 
 class FastRouter {
     /**
-     * Path to routes cache
+     * Path to routes cache file
      *
      * @var string
      */
@@ -20,6 +20,9 @@ class FastRouter {
      */
     protected $dispatcher;
 
+    /**
+     * @var string
+     */
     protected $paramsKey;
 
     /**
@@ -44,7 +47,7 @@ class FastRouter {
     protected function getUri() {
         $alias = $this->modx->getOption('request_alias', null, 'q');
 
-        $uri = isset($_REQUEST[$alias]) ? (string)$_REQUEST[$alias] : '';
+        $uri = isset($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
 
         return '/' . ltrim($uri, '/');
     }
@@ -54,8 +57,8 @@ class FastRouter {
      */
     protected function getDispatcher() {
         if (!isset($this->dispatcher)) {
-            $this->dispatcher = FastRoute\cachedDispatcher(function (FastRoute\RouteCollector $r) {
-                $this->getRoutes($r);
+            $this->dispatcher = FastRoute\cachedDispatcher(function (FastRoute\RouteCollector $router) {
+                $this->getRoutes($router);
             }, array('cacheFile' => $this->cacheFile));
         }
 
@@ -63,18 +66,18 @@ class FastRouter {
     }
 
     /**
-     * @param \FastRoute\RouteCollector $r
+     * @param FastRoute\RouteCollector $router
      */
-    protected function getRoutes(FastRoute\RouteCollector $r) {
+    protected function getRoutes(FastRoute\RouteCollector $router) {
         $routes = json_decode($this->modx->getChunk('fastrouter'), true);
 
         if (!$routes) {
-            throw new \InvalidArgumentException('Invalid routes');
+            throw new InvalidArgumentException('Invalid routes');
         }
 
-        foreach ($routes as $route) {
-            if (count($route) == 3) {
-                $r->addRoute($route[0], $route[1], $route[2]);
+        foreach ($routes as $r) {
+            if (isset($r[0], $r[1], $r[2]) && (int) $r[2]) {
+                $router->addRoute($r[0], $r[1], $r[2]);
             }
         }
     }
@@ -94,20 +97,20 @@ class FastRouter {
                 break;
 
             case FastRoute\Dispatcher::FOUND:
-                return $this->handle($params);
+                return $this->handle($params[1], $params[2]);
                 break;
         }
     }
 
     /**
-     * @param array $params
+     * @param int $id
+     * @param array $data
      * @return null
      */
-    protected function handle(array $params) {
-        if ((int)$params[1] == $params[1]) {
-            $_REQUEST = $_REQUEST + array($this->paramsKey => $params[2]);
-            $this->modx->sendForward($params[1]);
-        }
+    protected function handle($id, array $data) {
+        $_REQUEST += array($this->paramsKey => $data);
+
+        $this->modx->sendForward($id);
 
         return null;
     }
@@ -130,7 +133,7 @@ class FastRouter {
     }
 
     /**
-     * Remove routes cache
+     * Remove routes cache file
      */
     public function clearCache() {
         if (file_exists($this->cacheFile)) {
