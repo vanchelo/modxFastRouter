@@ -3,11 +3,11 @@
 define('DS', DIRECTORY_SEPARATOR);
 
 /* define package */
-define('PKG_NAME', 'fastRouter');
+define('PKG_NAME', 'FastRouter');
 define('PKG_NAME_LOWER', strtolower(PKG_NAME));
 
-define('PKG_VERSION', '1.0.0');
-define('PKG_RELEASE', 'pl1');
+define('PKG_VERSION', '1.0.1');
+define('PKG_RELEASE', 'pl');
 define('PKG_AUTO_INSTALL', true);
 define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');
 
