@@ -76,7 +76,7 @@ class FastRouter {
         }
 
         foreach ($routes as $r) {
-            if (isset($r[0], $r[1], $r[2]) && (int) $r[2]) {
+            if (isset($r[0], $r[1], $r[2])) {
                 $router->addRoute($r[0], $r[1], $r[2]);
             }
         }
@@ -103,15 +103,20 @@ class FastRouter {
     }
 
     /**
-     * @param int $id
+     * @param mixed $route_handler
      * @param array $data
      * @return null
      */
-    protected function handle($id, array $data) {
+    protected function handle($route_handler, array $data)
+    {
         $_REQUEST += array($this->paramsKey => $data);
 
-        $this->modx->sendForward($id);
-
+        if (is_numeric($route_handler)) {
+            $this->modx->sendForward($route_handler);
+        } else {
+            echo $this->modx->runSnippet($route_handler);
+            die;
+        }
         return null;
     }
 
