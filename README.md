@@ -26,7 +26,7 @@
 $modx->sendErrorPage(array('stop' => true));
 ```
 
-Все именнованные параметры попадут в массив `fastrouter` в глобальном массиве `$_REQUEST`. В нашем случае по первому маршруту, например `http://site.com/fastrouter/vanchelo/10` получим вот такие данные:
+Если использовать в качестве обработчкика ID ресурса, то все именнованные параметры попадут в массив `fastrouter` в глобальном массиве `$_REQUEST`. В нашем случае по первому маршруту, например `http://site.com/fastrouter/vanchelo/10` получим вот такие данные:
 ```php
 var_dump($_REQUEST);
 
@@ -39,6 +39,15 @@ Array
             [id] => 10
         )
 )
+```
+
+В случае когда обработчиком является сниппет, все параметры будут доступны в `$scriptProperties`, получить их можно будет таким образов:
+
+```php
+$key = $modx->getOption('fastrouter.paramsKey', null, 'fastrouter');
+$params = $modx->getOption($key, $scriptProperties, array());
+
+return '<pre>' . print_r($params, true) . '</pre>';
 ```
 
 По умолчанию имя ключа со всеми параметрами маршрута - `fastrouter`.
