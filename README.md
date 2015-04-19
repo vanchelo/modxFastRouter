@@ -53,4 +53,5 @@ return '<pre>' . print_r($params, true) . '</pre>';
 По умолчанию имя ключа со всеми параметрами маршрута - `fastrouter`.
 Для задания своего ключа измените в настройках системы параметр `fastrouter.paramsKey`.
 
-Скачать готовый пакет здесь https://www.dropbox.com/sh/8d2eamq9tybkqz4/AAAH00ZP6gp51EFLI7TMrzxAa?dl=0
+Скачать готовый пакет здесь https://www.dropbox.com/s/n363q1cuf5dwx37/fastrouter-1.0.2-pl.transport.zip?dl=1
+Или последний релиз с GitHub https://github.com/vanchelo/modxFastRouter/releases 
