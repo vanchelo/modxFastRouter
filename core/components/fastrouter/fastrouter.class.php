@@ -100,23 +100,29 @@ class FastRouter {
                 return $this->handle($params[1], $params[2]);
                 break;
         }
+
+        return null;
     }
 
     /**
-     * @param mixed $route_handler
+     * @param mixed $routeHandler
      * @param array $data
+     *
      * @return null
      */
-    protected function handle($route_handler, array $data)
-    {
-        $_REQUEST += array($this->paramsKey => $data);
-
-        if (is_numeric($route_handler)) {
-            $this->modx->sendForward($route_handler);
+    protected function handle($routeHandler, array $data) {
+        if (is_numeric($routeHandler)) {
+            // Send forward to resource
+            $_REQUEST += array($this->paramsKey => $data);
+            $this->modx->sendForward($routeHandler);
         } else {
-            echo $this->modx->runSnippet($route_handler);
+            // Call snippet
+            echo $this->modx->runSnippet($routeHandler, array(
+                $this->paramsKey => $data
+            ));
             die;
         }
+
         return null;
     }
 
