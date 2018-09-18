@@ -1,24 +1,27 @@
 <?php
 
-$settings = array();
+$settings = [];
 
-$tmp = array(
-    'paramsKey' => array(
+$tmp = [
+    'paramsKey' => [
         'xtype' => 'textarea',
         'value' => 'fastrouter',
         'area' => 'general',
-    ),
-);
+    ],
+];
 
 foreach ($tmp as $k => $v) {
     /* @var modSystemSetting $setting */
     $setting = $modx->newObject('modSystemSetting');
-    $setting->fromArray(array_merge(
-        array(
+    $setting->fromArray(
+        array_merge([
             'key' => PKG_NAME_LOWER . '.' . $k,
             'namespace' => PKG_NAME_LOWER,
-        ), $v
-    ), '', true, true);
+        ], $v),
+        '',
+        true,
+        true
+    );
 
     $settings[] = $setting;
 }

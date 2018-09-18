@@ -8,7 +8,7 @@
 
 if ($object->xpdo) {
     /** @var modX $modx */
-    $modx =& $object->xpdo;
+    $modx = $object->xpdo;
 
     $success = false;
     switch ($options[xPDOTransport::PACKAGE_ACTION]) {

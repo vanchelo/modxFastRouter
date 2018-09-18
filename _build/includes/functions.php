@@ -1,33 +1,34 @@
 <?php
 
 /**
- * @param $filename
+ * @param string $filename
  *
  * @return string
  */
-function getSnippetContent($filename) {
+function getSnippetContent($filename)
+{
     $file = trim(file_get_contents($filename));
     preg_match('#\<\?php(.*)#is', $file, $data);
 
     return rtrim(rtrim(trim($data[1]), '?>'));
 }
 
-
 /**
  * Recursive directory remove
  *
- * @param $dir
+ * @param string $dir
  */
-function rrmdir($dir) {
+function rrmdir($dir)
+{
     if (is_dir($dir)) {
-        $objects = scandir($dir);
+        $objects = scandir($dir, SCANDIR_SORT_NONE);
 
         foreach ($objects as $object) {
-            if ($object != "." && $object != "..") {
-                if (filetype($dir . "/" . $object) == "dir") {
-                    rrmdir($dir . "/" . $object);
+            if ($object !== '.' && $object !== '..') {
+                if (filetype($dir . '/' . $object) === 'dir') {
+                    rrmdir($dir . '/' . $object);
                 } else {
-                    unlink($dir . "/" . $object);
+                    unlink($dir . '/' . $object);
                 }
             }
         }

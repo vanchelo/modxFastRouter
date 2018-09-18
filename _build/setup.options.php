@@ -37,6 +37,7 @@ if ($chunks) {
 				</small>
 			';
             break;
+
         default:
             $output .= 'Select chunks, which need to <b>overwrite</b>:<br/>
 				<small>

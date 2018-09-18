@@ -6,7 +6,7 @@ define('DS', DIRECTORY_SEPARATOR);
 define('PKG_NAME', 'FastRouter');
 define('PKG_NAME_LOWER', strtolower(PKG_NAME));
 
-define('PKG_VERSION', '1.0.2');
+define('PKG_VERSION', '1.0.4');
 define('PKG_RELEASE', 'pl');
 define('PKG_AUTO_INSTALL', true);
 define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');
@@ -14,10 +14,10 @@ define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');
 /* define paths */
 if (isset($_SERVER['MODX_BASE_PATH'])) {
     define('MODX_BASE_PATH', $_SERVER['MODX_BASE_PATH']);
-} elseif (file_exists(realpath(dirname(dirname(__FILE__))) . DS . 'core')) {
-    define('MODX_BASE_PATH', realpath(dirname(dirname(__FILE__))) . DS);
+} elseif (file_exists(realpath(dirname(__DIR__)) . DS . 'core')) {
+    define('MODX_BASE_PATH', realpath(dirname(__DIR__)) . DS);
 } else {
-    define('MODX_BASE_PATH', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
+    define('MODX_BASE_PATH', dirname(dirname(dirname(__DIR__))) . '/');
 }
 
 define('MODX_CORE_PATH', MODX_BASE_PATH . 'core/');
@@ -42,6 +42,6 @@ define('BUILD_CHUNK_STATIC', false);
 define('BUILD_SNIPPET_STATIC', false);
 define('BUILD_PLUGIN_STATIC', false);
 
-$BUILD_RESOLVERS = array(
+$BUILD_RESOLVERS = [
     'chunks',
-);
+];

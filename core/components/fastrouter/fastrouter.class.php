@@ -5,7 +5,12 @@ require_once __DIR__ . '/vendor/nikic/fast-route/src/bootstrap.php';
 /**
  * Class FastRouter
  */
-class FastRouter {
+class FastRouter
+{
+    const FAST_ROUTER = 'fastrouter';
+    const EVENT = 'OnPageNotFound';
+    const EVENT_ON_CHUNK_SAVE = 'OnChunkSave';
+
     /**
      * Path to routes cache file
      *
@@ -26,14 +31,16 @@ class FastRouter {
     protected $paramsKey;
 
     /**
-     * FastRouter constructor.
+     * FastRouter constructor
      *
      * @param modX $modx
      */
-    function __construct(modX $modx) {
+    public function __construct(modX $modx)
+    {
         $this->modx = $modx;
-        $this->cacheFile = $modx->getOption(xPDO::OPT_CACHE_PATH) . 'fastrouter.cache.php';
-        $this->paramsKey = $modx->getOption('fastrouter.paramsKey', null, 'fastrouter');
+        $this->cacheFile = $modx->getOption(xPDO::OPT_CACHE_PATH) . static::FAST_ROUTER . '.cache.php';
+        $this->paramsKey = $modx->getOption(static::FAST_ROUTER . '.paramsKey', null, static::FAST_ROUTER);
+
         $this->registerDispatcher();
     }
 
@@ -42,7 +49,8 @@ class FastRouter {
      *
      * @return string
      */
-    protected function getMethod() {
+    protected function getMethod()
+    {
         return strtoupper($_SERVER['REQUEST_METHOD']);
     }
 
@@ -51,10 +59,11 @@ class FastRouter {
      *
      * @return string
      */
-    protected function getUri() {
+    protected function getUri()
+    {
         $alias = $this->modx->getOption('request_alias', null, 'q');
 
-        $uri = isset($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
+        $uri = isset($_REQUEST[$alias]) && is_scalar($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
 
         return '/' . ltrim($uri, '/');
     }
@@ -64,7 +73,8 @@ class FastRouter {
      *
      * @return FastRoute\Dispatcher|FastRoute\Dispatcher\GroupCountBased
      */
-    protected function getDispatcher() {
+    protected function getDispatcher()
+    {
         return $this->dispatcher;
     }
 
@@ -73,11 +83,12 @@ class FastRouter {
      *
      * @param FastRoute\RouteCollector $router
      */
-    protected function getRoutes(FastRoute\RouteCollector $router) {
+    protected function getRoutes(FastRoute\RouteCollector $router)
+    {
         $routes = json_decode($this->getRoutesChunk(), true);
 
         if (!$routes) {
-            throw new InvalidArgumentException('Invalid routes');
+            throw new InvalidArgumentException('Routes is invalid.');
         }
 
         foreach ($routes as $r) {
@@ -92,10 +103,9 @@ class FastRouter {
      *
      * @return string
      */
-    protected function getRoutesChunk() {
-        $chunk = $this->modx->getChunk($this->chunkName());
-
-        return $chunk;
+    protected function getRoutesChunk()
+    {
+        return $this->modx->getChunk($this->chunkName());
     }
 
     /**
@@ -103,10 +113,9 @@ class FastRouter {
      *
      * @return string
      */
-    public function chunkName() {
-        $name = $this->modx->getOption('fastrouter.chunkName', null, 'fastrouter');
-
-        return $name;
+    public function chunkName()
+    {
+        return $this->modx->getOption(static::FAST_ROUTER . '.chunkName', null, static::FAST_ROUTER);
     }
 
     /**
@@ -114,7 +123,8 @@ class FastRouter {
      *
      * @return null
      */
-    public function dispatch() {
+    public function dispatch()
+    {
         $dispatcher = $this->getDispatcher();
 
         $params = $dispatcher->dispatch($this->getMethod(), $this->getUri());
@@ -123,11 +133,9 @@ class FastRouter {
             case FastRoute\Dispatcher::NOT_FOUND:
             case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 return $this->error();
-                break;
 
             case FastRoute\Dispatcher::FOUND:
                 return $this->handle($params[1], $params[2]);
-                break;
         }
 
         return null;
@@ -136,25 +144,27 @@ class FastRouter {
     /**
      * Handle route
      *
-     * @param mixed $routeHandler
+     * @param integer|string $routeHandler
      * @param array $data
      *
      * @return null
      */
-    protected function handle($routeHandler, array $data) {
+    protected function handle($routeHandler, array $data)
+    {
+        // Send forward to resource
         if (is_numeric($routeHandler)) {
-            // Send forward to resource
-            $_REQUEST += array($this->paramsKey => $data);
+            $_REQUEST += [$this->paramsKey => $data];
             $this->modx->sendForward($routeHandler);
-        } else {
-            // Call snippet
-            echo $this->modx->runSnippet($routeHandler, array(
-                $this->paramsKey => $data,
-            ));
-            die;
+
+            return null;
         }
 
-        return null;
+        // TODO: Refactor. Remove exit. What is the best way to do this?
+        // Call snippet
+        echo $this->modx->runSnippet($routeHandler, [
+            $this->paramsKey => $data,
+        ]);
+        exit();
     }
 
     /**
@@ -162,14 +172,19 @@ class FastRouter {
      *
      * @return null
      */
-    protected function error() {
-        $options = array(
+    protected function error()
+    {
+        $options = [
             'response_code' => $this->modx->getOption('error_page_header', null, 'HTTP/1.1 404 Not Found'),
             'error_type' => '404',
             'error_header' => $this->modx->getOption('error_page_header', null, 'HTTP/1.1 404 Not Found'),
             'error_pagetitle' => $this->modx->getOption('error_page_pagetitle', null, 'Error 404: Page not found'),
-            'error_message' => $this->modx->getOption('error_page_message', null, '<h1>Page not found</h1><p>The page you requested was not found.</p>'),
-        );
+            'error_message' => $this->modx->getOption(
+                'error_page_message',
+                null,
+                '<h1>Page not found</h1><p>The page you requested was not found.</p>'
+            ),
+        ];
 
         $this->modx->sendForward($this->modx->getOption('error_page', $options, '404'), $options);
 
@@ -179,7 +194,8 @@ class FastRouter {
     /**
      * Remove routes cache
      */
-    public function clearCache() {
+    public function clearCache()
+    {
         if (file_exists($this->cacheFile)) {
             unlink($this->cacheFile);
         }
@@ -188,27 +204,35 @@ class FastRouter {
     /**
      * Register router dispatcher
      */
-    protected function registerDispatcher() {
+    protected function registerDispatcher()
+    {
         $this->dispatcher = FastRoute\cachedDispatcher(function (FastRoute\RouteCollector $router) {
             $this->getRoutes($router);
-        }, array(
+        }, [
             'cacheFile' => $this->cacheFile,
-        ));
+        ]);
     }
 
     /**
      * @return bool
      */
-    public function needDispath() {
-        return $this->modx->event->name === 'OnPageNotFound' && !isset($this->modx->event->params['stop']);
+    public function needDispatch()
+    {
+        $event = $this->modx->event;
+
+        return static::EVENT === $event->name && !isset($event->params['stop']);
     }
 
     /**
      * Check if chunk with routes updated
      *
+     * @param string $chunkName
      * @return bool
      */
-    public function isRoutesChunkUpdated($chunkName) {
-        return $this->modx->event->name == 'OnChunkSave' && $chunkName == $this->chunkName();
+    public function isRoutesChunkUpdated($chunkName)
+    {
+        $event = $this->modx->event;
+
+        return static::EVENT_ON_CHUNK_SAVE === $event->name && $chunkName === $this->chunkName();
     }
 }
