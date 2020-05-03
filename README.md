@@ -3,7 +3,7 @@
 
 # MODX Fast Router
 
-## Key featured
+## Key features
 
 * Fast and flexible routing based on powerful PHP router <https://github.com/nikic/FastRoute>.
 * Resource or Snippet as route handler.
