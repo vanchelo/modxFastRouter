@@ -2,9 +2,6 @@
 
 require_once __DIR__ . '/vendor/nikic/fast-route/src/bootstrap.php';
 
-/**
- * Class FastRouter
- */
 class FastRouter
 {
     const FAST_ROUTER = 'fastrouter';
@@ -12,23 +9,23 @@ class FastRouter
     const EVENT_ON_CHUNK_SAVE = 'OnChunkSave';
 
     /**
+     * @var modX
+     */
+    protected $modx;
+    /**
      * Path to routes cache file
      *
      * @var string
      */
     protected $cacheFile;
     /**
-     * @var modX
+     * @var string
      */
-    protected $modx;
+    protected $paramsKey;
     /**
      * @var FastRoute\Dispatcher\GroupCountBased
      */
     protected $dispatcher;
-    /**
-     * @var string
-     */
-    protected $paramsKey;
 
     /**
      * FastRouter constructor
@@ -42,70 +39,6 @@ class FastRouter
         $this->paramsKey = $modx->getOption(static::FAST_ROUTER . '.paramsKey', null, static::FAST_ROUTER);
 
         $this->registerDispatcher();
-    }
-
-    /**
-     * Get request method
-     *
-     * @return string
-     */
-    protected function getMethod()
-    {
-        return strtoupper($_SERVER['REQUEST_METHOD']);
-    }
-
-    /**
-     * Get request URI
-     *
-     * @return string
-     */
-    protected function getUri()
-    {
-        $alias = $this->modx->getOption('request_alias', null, 'q');
-
-        $uri = isset($_REQUEST[$alias]) && is_scalar($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
-
-        return '/' . ltrim($uri, '/');
-    }
-
-    /**
-     * Get routes dispatcher
-     *
-     * @return FastRoute\Dispatcher|FastRoute\Dispatcher\GroupCountBased
-     */
-    protected function getDispatcher()
-    {
-        return $this->dispatcher;
-    }
-
-    /**
-     * Register routes
-     *
-     * @param FastRoute\RouteCollector $router
-     */
-    protected function getRoutes(FastRoute\RouteCollector $router)
-    {
-        $routes = json_decode($this->getRoutesChunk(), true);
-
-        if (!$routes) {
-            throw new InvalidArgumentException('Routes is invalid.');
-        }
-
-        foreach ($routes as $r) {
-            if (isset($r[0], $r[1], $r[2])) {
-                $router->addRoute($r[0], $r[1], $r[2]);
-            }
-        }
-    }
-
-    /**
-     * Get routes chunk content
-     *
-     * @return string
-     */
-    protected function getRoutesChunk()
-    {
-        return $this->modx->getChunk($this->chunkName());
     }
 
     /**
@@ -142,6 +75,108 @@ class FastRouter
     }
 
     /**
+     * Clear routes cache
+     *
+     * @return void
+     */
+    public function clearCache()
+    {
+        if (file_exists($this->cacheFile)) {
+            unlink($this->cacheFile);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function needDispatch()
+    {
+        $event = $this->modx->event;
+
+        return static::EVENT === $event->name && !isset($event->params['stop']);
+    }
+
+    /**
+     * Check if chunk with routes updated
+     *
+     * @param string $chunkName
+     *
+     * @return bool
+     */
+    public function isRoutesChunkUpdated($chunkName)
+    {
+        $event = $this->modx->event;
+
+        return static::EVENT_ON_CHUNK_SAVE === $event->name && $chunkName === $this->chunkName();
+    }
+
+    /**
+     * Get request method
+     *
+     * @return string
+     */
+    public function getMethod()
+    {
+        return strtoupper($_SERVER['REQUEST_METHOD']);
+    }
+
+    /**
+     * Get request URI
+     *
+     * @return string
+     */
+    public function getUri()
+    {
+        $alias = $this->modx->getOption('request_alias', null, 'q');
+
+        $uri = isset($_REQUEST[$alias]) && is_scalar($_REQUEST[$alias]) ? (string) $_REQUEST[$alias] : '';
+
+        return '/' . ltrim($uri, '/');
+    }
+
+    /**
+     * Get routes dispatcher
+     *
+     * @return FastRoute\Dispatcher|FastRoute\Dispatcher\GroupCountBased
+     */
+    public function getDispatcher()
+    {
+        return $this->dispatcher;
+    }
+
+    /**
+     * Register routes
+     *
+     * @param FastRoute\RouteCollector $router
+     *
+     * @return void
+     */
+    protected function getRoutes(FastRoute\RouteCollector $router)
+    {
+        $routes = json_decode($this->getRoutesChunk(), true);
+
+        if (!$routes) {
+            throw new InvalidArgumentException('Routes is invalid.');
+        }
+
+        foreach ($routes as $r) {
+            if (isset($r[0], $r[1], $r[2])) {
+                $router->addRoute($r[0], $r[1], $r[2]);
+            }
+        }
+    }
+
+    /**
+     * Get routes chunk content
+     *
+     * @return string
+     */
+    protected function getRoutesChunk()
+    {
+        return $this->modx->getChunk($this->chunkName());
+    }
+
+    /**
      * Handle route
      *
      * @param integer|string $routeHandler
@@ -151,8 +186,10 @@ class FastRouter
      */
     protected function handle($routeHandler, array $data)
     {
+        //
         // Send forward to resource
-        if (is_numeric($routeHandler)) {
+        //
+        if (ctype_digit($routeHandler)) {
             $_REQUEST += [$this->paramsKey => $data];
             $this->modx->sendForward($routeHandler);
 
@@ -160,7 +197,9 @@ class FastRouter
         }
 
         // TODO: Refactor. Remove exit. What is the best way to do this?
+        //
         // Call snippet
+        //
         echo $this->modx->runSnippet($routeHandler, [
             $this->paramsKey => $data,
         ]);
@@ -192,17 +231,9 @@ class FastRouter
     }
 
     /**
-     * Remove routes cache
-     */
-    public function clearCache()
-    {
-        if (file_exists($this->cacheFile)) {
-            unlink($this->cacheFile);
-        }
-    }
-
-    /**
      * Register router dispatcher
+     *
+     * @return void
      */
     protected function registerDispatcher()
     {
@@ -211,28 +242,5 @@ class FastRouter
         }, [
             'cacheFile' => $this->cacheFile,
         ]);
-    }
-
-    /**
-     * @return bool
-     */
-    public function needDispatch()
-    {
-        $event = $this->modx->event;
-
-        return static::EVENT === $event->name && !isset($event->params['stop']);
-    }
-
-    /**
-     * Check if chunk with routes updated
-     *
-     * @param string $chunkName
-     * @return bool
-     */
-    public function isRoutesChunkUpdated($chunkName)
-    {
-        $event = $this->modx->event;
-
-        return static::EVENT_ON_CHUNK_SAVE === $event->name && $chunkName === $this->chunkName();
     }
 }

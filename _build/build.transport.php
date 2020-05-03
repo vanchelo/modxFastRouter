@@ -97,7 +97,7 @@ if (defined('BUILD_EVENT_UPDATE')) {
         $modx->log(xPDO::LOG_LEVEL_INFO, 'Packaged in ' . count($events) . ' Plugins events.');
     }
 
-    unset ($events, $event, $attributes);
+    unset($events, $event, $attributes);
 }
 
 /**

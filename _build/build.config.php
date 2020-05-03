@@ -2,7 +2,9 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 
-/* define package */
+/**
+ * Define package
+ */
 define('PKG_NAME', 'FastRouter');
 define('PKG_NAME_LOWER', strtolower(PKG_NAME));
 
@@ -11,7 +13,9 @@ define('PKG_RELEASE', 'pl');
 define('PKG_AUTO_INSTALL', true);
 define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');
 
-/* define paths */
+/**
+ * Define paths
+ */
 if (isset($_SERVER['MODX_BASE_PATH'])) {
     define('MODX_BASE_PATH', $_SERVER['MODX_BASE_PATH']);
 } elseif (file_exists(realpath(dirname(__DIR__)) . DS . 'core')) {
@@ -24,13 +28,17 @@ define('MODX_CORE_PATH', MODX_BASE_PATH . 'core/');
 define('MODX_MANAGER_PATH', MODX_BASE_PATH . 'manager/');
 define('MODX_CONNECTORS_PATH', MODX_BASE_PATH . 'connectors/');
 
-/* define urls */
+/**
+ * Define URLs
+ */
 define('MODX_BASE_URL', '/');
 define('MODX_CORE_URL', MODX_BASE_URL . 'core/');
 define('MODX_MANAGER_URL', MODX_BASE_URL . 'manager/');
 define('MODX_CONNECTORS_URL', MODX_BASE_URL . 'connectors/');
 
-/* define build options */
+/**
+ * Define build options
+ */
 define('BUILD_ACTION_UPDATE', false);
 define('BUILD_SETTING_UPDATE', false);
 define('BUILD_CHUNK_UPDATE', false);

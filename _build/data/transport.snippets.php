@@ -11,7 +11,7 @@ $tmp = [
 ];
 
 foreach ($tmp as $k => $v) {
-    /* @avr modSnippet $snippet */
+    /* @var modSnippet $snippet */
     $snippet = $modx->newObject('modSnippet');
     $snippet->fromArray([
         'id' => 0,

@@ -1,7 +1,12 @@
 <?php
+/**
+ * Resolves chunks
+ *
+ * @var xPDOObject $object
+ * @var array $options
+ */
 
 if ($object->xpdo) {
-    /** @var modX $modx */
     $modx = $object->xpdo;
 
     switch ($options[xPDOTransport::PACKAGE_ACTION]) {

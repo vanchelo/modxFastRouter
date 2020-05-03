@@ -14,7 +14,7 @@ $tmp = [
 ];
 
 foreach ($tmp as $k => $v) {
-    /* @avr modplugin $plugin */
+    /* @var modPlugin $plugin */
     $plugin = $modx->newObject('modPlugin');
     $plugin->fromArray([
         'name' => $k,
