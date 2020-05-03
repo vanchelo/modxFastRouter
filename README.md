@@ -1,16 +1,17 @@
+**english** | [русский](./README.ru.md)
+- - -
+
 # MODX Fast Router
 
-В основе MODX Fast Router используется замечательная библиотека https://github.com/nikic/FastRoute.
+## Key featured
 
-## Основные особенности
+* Fast and flexible routing based on powerful PHP router <https://github.com/nikic/FastRoute>.
+* Resource or Snippet as route handler.
+* Easy route creation and configuration.
 
-* Гибкая маршрутизация благодаря библиотеке **nikic/FastRoute**.
-* Ресурс или сниппет в качестве обработчика маршрута.
-* Простое создание и конфигурирование маршрутов.
+## Usage
 
-## Использование
-
-Объявлять маршруты нужно в чанке **fastrouter** в таком формате:
+Routes must be declared in the chunk **fastrouter** in the following format:
 
 ```json
 [
@@ -18,38 +19,39 @@
     ["GET","/fastrouter/{id:[0-9]+}","1"],
     ["GET","/hello/{name}","1"],
     ["GET","/contact","1"],
-    ["GET","/maybe-ajax-request","snippet_for_ajax_request"],
+    ["GET","/maybe-ajax-request","snippet_for_ajax_request"]
 ]
 ```
 
-- Первый параметр `GET` метод запроса, может быть `GET`, `POST`.
-- Второй параметр `/fastrouter/{name}/{id:[0-9]+}` наш маршрут, где `{name}` именованный параметр принимающий любые символы, `{id:[0-9]+}` именованный параметр принимающий только цифры. Можно использовать любые валидные регулярные выражения.
-- Третий параметр `2` ID ресурса куда будет направлен запрос или имя сниппета.
+- First argument request method (`GET`), can be one of `GET`, `POST`, `PATCH`, `PUT`, `DELETE`.
+- Second argument route path (`/fastrouter/{name}/{id:[0-9]+}`, where `{name}` named param with any character, `{id:[0-9]+}` must be a number). Allowed using regular expressions.
+- The third parameter is the resource ID (`2`) where the request will be sent, or the name of the snippet (`snippet_for_ajax_request`).
 
-Если запрошенному URL не соответствует ни один объявленный маршрут, будет сгенерированна 404 ошибка.
+If the requested URL does not match any declared routes, a 404 error will be generated.
 
-Чтобы запрос не вошел в рекурсию при использовании в своих сниппетах и компонентах метода `sendErrorPage`, необходимо передать в метод `array('stop' => true)`. Должно получится вот так:
-
+To prevent request from a recursion when using the `sendErrorPage` method in your snippets and components, you must pass `array('stop' => true)` to the method.  
+It should look like this:
 ```php
 $modx->sendErrorPage(array('stop' => true));
 ```
 
-Если использовать в качестве обработчика ID ресурса, то все именованные параметры попадут в массив `fastrouter` в глобальном массиве `$_REQUEST`. В нашем случае по первому маршруту, например `http://site.com/fastrouter/vanchelo/10` получим вот такие данные:
+If you use the resource ID as a handler, then all named parameters will be available in the `$_REQUEST` array associates by `fastrouter` key.    
+In our case, the first route, eg `http://site.com/fastrouter/vanchelo/10` we get the following data:
 ```php
 var_dump($_REQUEST);
 
-Array
-(
-    [q] => user/vanchelo/10
-    [fastrouter] => Array
-        (
-            [name] => vanchelo
-            [id] => 10
-        )
-)
+// Array
+// (
+//     [q] => user/vanchelo/10
+//     [fastrouter] => Array
+//         (
+//             [name] => vanchelo
+//             [id] => 10
+//         )
+// )
 ```
 
-В случае, если обработчиком является сниппет, все параметры будут доступны в `$scriptProperties`, получить их можно будет таким образом:
+If the handler is a snippet, all parameters will be available in `$scriptProperties`, you can get them this way:
 
 ```php
 $key = $modx->getOption('fastrouter.paramsKey', null, 'fastrouter');
@@ -58,8 +60,23 @@ $params = $modx->getOption($key, $scriptProperties, array());
 return '<pre>' . print_r($params, true) . '</pre>';
 ```
 
-По умолчанию имя ключа со всеми параметрами маршрута - `fastrouter`.
-Для задания своего ключа измените в настройках системы параметр `fastrouter.paramsKey`.
+By default, the key of request params is `fastrouter`.
+To define custom key, change `fastrouter.paramsKey` in system settings as you need.
 
-Скачать готовый пакет здесь [fastrouter-1.0.4-pl.transport.zip](https://github.com/vanchelo/modxFastRouter/releases/download/1.0.4-pl/fastrouter-1.0.4-pl.transport.zip)
-Или последний релиз с GitHub https://github.com/vanchelo/modxFastRouter/releases 
+Download the latest release from: <https://github.com/vanchelo/modxFastRouter/releases>.
+
+## Got questions?
+
+If you have questions or general suggestions, don't hesitate to submit a new [Github issue](https://github.com/vanchelo/modxFastRouter/issues/new).
+
+## Contributing
+
+1. Fork it (<https://github.com/vanchelo/modxFastRouter/fork>)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Commit your changes (`git commit -am 'Add some fooBar'`)
+4. Push to the branch (`git push origin feature/fooBar`)
+5. Create a new Pull Request
+
+## License and Copyright
+
+This software released under the terms of the [MIT license](./LICENSE).
